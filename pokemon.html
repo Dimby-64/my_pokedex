@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pokédex — Timothy Guerra</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="pokemon.css" />
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="index.html" class="logo">TG</a>
+      <ul>
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#projects">Projects</a></li>
+        <li><a href="pokemon.html" class="active">Pokédex</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="pokedex-main">
+    <div class="container">
+      <h1 class="pokedex-title">My Pokédex</h1>
+      <p class="pokedex-sub">Search by name or number to add Pokémon to your collection.</p>
+
+      <form class="search-bar" id="searchForm">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="e.g. pikachu or 25"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button type="submit" class="btn">Add</button>
+      </form>
+
+      <p class="error-msg" id="errorMsg"></p>
+
+      <div class="stats-bar" id="statsBar">
+        <span id="countLabel">0 Pokémon caught</span>
+        <button class="btn-ghost" id="clearBtn">Clear all</button>
+      </div>
+
+      <div class="pokemon-grid" id="pokemonGrid">
+        <div class="empty-state" id="emptyState">
+          <p>No Pokémon yet. Add your first one above!</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Stats modal -->
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalName">
+    <div class="modal">
+      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+      <div class="modal-header">
+        <img id="modalSprite" src="" alt="" />
+        <div class="modal-meta">
+          <span class="modal-number" id="modalNumber"></span>
+          <h2 class="modal-name" id="modalName"></h2>
+          <div class="poke-types" id="modalTypes"></div>
+          <label class="shiny-toggle" id="shinyToggleLabel">
+            <input type="checkbox" id="shinyToggle" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">✨ Shiny</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-abilities">
+        <h3 class="stats-heading">Abilities</h3>
+        <div class="ability-list" id="abilityList"></div>
+      </div>
+      <div class="modal-stats">
+        <h3 class="stats-heading">Base Stats</h3>
+        <div id="statsList"></div>
+      </div>
+      <div class="modal-evolution">
+        <h3 class="stats-heading">Evolution Chain</h3>
+        <div class="evo-chain" id="evoChain">
+          <span class="evo-loading">Loading…</span>
+        </div>
+      </div>
+      <div class="modal-learnset">
+        <h3 class="stats-heading">Learnset</h3>
+        <input
+          type="text"
+          id="learnsetSearch"
+          class="learnset-search"
+          placeholder="Search moves…"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <div class="learnset-tabs" id="learnsetTabs">
+          <button class="learnset-tab active" data-method="level-up" data-label="Level Up">Level Up</button>
+          <button class="learnset-tab" data-method="machine" data-label="TM / HM">TM / HM</button>
+          <button class="learnset-tab" data-method="egg" data-label="Egg">Egg</button>
+          <button class="learnset-tab" data-method="tutor" data-label="Tutor">Tutor</button>
+        </div>
+        <div class="learnset-list" id="learnsetList">
+          <span class="evo-loading">Loading…</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Built by Timothy Guerra &copy; 2026</p>
+  </footer>
+
+  <script src="pokemon.js"></script>
+</body>
+</html>
