@@ -227,12 +227,20 @@ function renderCard(poke) {
     .join("");
 
   card.innerHTML = `
+    <button class="fav-btn${poke.favorite ? " fav-active" : ""}" aria-label="Favourite ${poke.name}" data-id="${poke.id}">★</button>
     <button class="remove-btn" aria-label="Remove ${poke.name}" data-id="${poke.id}">✕</button>
     <img src="${poke.sprite}" alt="${poke.name}" />
     <span class="poke-name">${poke.name}</span>
     <span class="poke-number">#${String(poke.id).padStart(3, "0")}</span>
     <div class="poke-types">${types}</div>
   `;
+
+  card.querySelector(".fav-btn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    poke.favorite = !poke.favorite;
+    e.currentTarget.classList.toggle("fav-active", poke.favorite);
+    save();
+  });
 
   card.querySelector(".remove-btn").addEventListener("click", (e) => {
     e.stopPropagation();
@@ -345,6 +353,25 @@ async function ensureEvolutionChain(poke) {
   save();
 }
 
+async function fetchPokemonById(id) {
+  try {
+    const res  = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+    const data = await res.json();
+    return {
+      id:          data.id,
+      name:        data.name,
+      sprite:      data.sprites.front_default,
+      shinySprite: data.sprites.front_shiny || null,
+      types:       data.types.map((t) => t.type.name),
+      stats:       data.stats.map((s) => ({ name: s.stat.name, value: s.base_stat })),
+      abilities:   data.abilities.map((a) => ({ name: a.ability.name, isHidden: a.is_hidden })),
+      speciesUrl:  data.species.url,
+    };
+  } catch {
+    return null;
+  }
+}
+
 function renderEvolutionChain(poke) {
   const container = document.getElementById("evoChain");
   const chain     = poke.evolutionChain;
@@ -369,9 +396,8 @@ function renderEvolutionChain(poke) {
       const caughtPoke = pokedex.find((p) => p.id === mon.id);
       const classes    = [
         "evo-mon",
-        isCurrent              ? "evo-current"   : "",
-        !isCurrent && caughtPoke ? "evo-clickable" : "",
-        !caughtPoke            ? "evo-not-caught" : "",
+        isCurrent   ? "evo-current"   : "evo-clickable",
+        !caughtPoke ? "evo-not-caught" : "",
       ].filter(Boolean).join(" ");
       const region = regionLabel(mon.name);
       const badge  = region ? `<span class="evo-region">${region}</span>` : "";
@@ -388,9 +414,15 @@ function renderEvolutionChain(poke) {
   container.innerHTML = parts.join('<span class="evo-arrow">→</span>');
 
   container.querySelectorAll(".evo-clickable").forEach((el) => {
-    el.addEventListener("click", () => {
-      const target = pokedex.find((p) => p.id === parseInt(el.dataset.monId, 10));
-      if (target) openModal(target);
+    el.addEventListener("click", async () => {
+      const monId  = parseInt(el.dataset.monId, 10);
+      const target = pokedex.find((p) => p.id === monId);
+      if (target) {
+        openModal(target);
+      } else {
+        const tmp = await fetchPokemonById(monId);
+        if (tmp) openModal(tmp);
+      }
     });
   });
 }
@@ -446,6 +478,18 @@ async function openModal(poke) {
       }
       if (!learnsetCache[poke.id]) {
         learnsetCache[poke.id] = data.moves;
+        if (!data.moves.length && !data.is_default) {
+          try {
+            const specRes  = await fetch(data.species.url);
+            const specData = await specRes.json();
+            const def      = specData.varieties.find((v) => v.is_default);
+            if (def) {
+              const baseRes  = await fetch(def.pokemon.url);
+              const baseData = await baseRes.json();
+              learnsetCache[poke.id] = baseData.moves;
+            }
+          } catch { /* keep empty */ }
+        }
       }
       save();
     } catch {
